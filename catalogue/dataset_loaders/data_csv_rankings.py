@@ -1,7 +1,6 @@
 import os.path
 from mammoth.datasets import CSV
 from mammoth.integration import loader
-import fairbench as fb
 import pandas as pd
 from typing import List, Optional
 
