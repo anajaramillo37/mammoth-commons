@@ -18,31 +18,38 @@ class Fairness_metrics_in_rankings:
     def Exposure_distance(self,
                           path,
                           model,
-                          sensitive):
+                          ranking_variable,
+                          sensitive_attribute,
+                          protected_attirbute,
+                          sampling_attribute):
         '''Exposure distance to see where are the two groups located in the ranking'''
-        assert len(sensitive) == 2
-
         dataset = data_csv_rankings(path)
         Dataframe_ranking = model(dataset,ranking_variable)
-        Dataframe_ranking = Dataframe_ranking[~Dataframe_ranking[sensitive_attribute].isnull()]
+        Dataframe_ranking = Dataframe_ranking[~Dataframe_ranking[sampling_attribute].isnull()]
+
+        EDr = {}
+        for category in set(Dataframe_ranking[sampling_attribute]):
+            Dataframe_ranking_filtered = Dataframe_ranking[Dataframe_ranking[sampling_attribute]==category]
+            Dataframe_ranking_filtered = Dataframe_ranking_filtered[~Dataframe_ranking_filtered[sensitive_attribute].isnull()]
+            sensitive_attribute ='Gender'
+            rankings_per_attribute = {}
+            ranking = 'Ranking_'+ranking_variable
+            sensitive = list(set(Dataframe_ranking_filtered[sensitive_attribute]))
+            try:
+                assert len(sensitive) == 2
+                for attribute_value in sensitive:
+                    rankings_per_attribute[attribute_value] = list(Dataframe_ranking_filtered[Dataframe_ranking_filtered[attribute] == attribute_value][ranking]
+                                                            )
     
-        sensitive_attribute ='Gender'
-        rankings_per_attribute = {}
-        ranking = 'Ranking_'+ranking_variable
-        sensitive = list(set(Dataframe_ranking[sensitive_attribute]))
-        assert len(sensitive) == 2
-        
-        for attribute_value in sensitive:
-            rankings_per_attribute[attribute_value] = list(Dataframe_ranking[Dataframe_ranking[attribute] == attribute_value][ranking]
-                                                    )
+                non_protected_attribute = [i for i in sensitive if i != protected_attirbute][0]
     
-        non_protected_attribute = [i for i in sensitive if i != protected_attirbute][0]
+                ranking_position_protected_attribute = [b(1 / (r + 1)) for r in rankings_per_attribute[protected_attirbute]]
+                ranking_position_non_protected_attribute = [b(1 / (r + 1)) for r in rankings_per_attribute[non_protected_attribute]]
     
-        ranking_position_protected_attribute = [b(1 / (r + 1)) for r in rankings_per_attribute[protected_attirbute]]
-        ranking_position_non_protected_attribute = [b(1 / (r + 1)) for r in rankings_per_attribute[non_protected_attribute]]
-    
-        Min_size = min(len(ranking_position_protected_attribute), len(ranking_position_non_protected_attribute))
-        EDr = np.round((sum(ranking_position_protected_attribute[:Min_size]) - sum(ranking_position_non_protected_attribute[:Min_size])), 2)
+                Min_size = min(len(ranking_position_protected_attribute), len(ranking_position_non_protected_attribute))
+                EDr[category] = np.round((sum(ranking_position_protected_attribute[:Min_size]) - sum(ranking_position_non_protected_attribute[:Min_size])), 2)
+            except:
+                EDr[category] = np.nan
         return EDr
 
     def create_box_plot_rankings(dataframe, hue_variable, ranking_variable, y_variable):  
