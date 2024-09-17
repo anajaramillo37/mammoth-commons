@@ -2,6 +2,7 @@ from mammoth.exports import Markdown
 from mammoth.integration import metric
 from loader_data_csv_rankings import data_csv_rankings
 from Rankings import RANKINGS
+import seaborn as sns
 import numpy as np
 
 
@@ -33,6 +34,30 @@ class Fairness_metrics_in_rankings:
             [self.b(1 / (r + 1)) for r in Rankings_per_attribute[Non_protected_attribute]])) / 2000, 2)
 
         return self.EDr
+
+    def create_box_plot_rankings(dataframe, hue_variable, ranking_variable, y_variable):  
+        width = 0.6, font_size_out = 14, nrows = 1, ncols = 1
+        fig, ax = plt.subplots(ncols=ncols, nrows=nrows,figsize=(5*ncols,3*nrows), sharex= True, sharey= False,
+                               gridspec_kw={'width_ratios': [1]*ncols})
+    
+        sns.boxplot(data=dataframe, x=ranking_variable, y=y_variable, 
+                    hue=hue_variable,
+                    saturation=0.8,linewidth=0.75, ax = ax)
+    
+    
+        for spine in ['right', 'top']:
+            ax.spines[spine].set_visible(False)
+    
+        ax.tick_params('x', size=5, colors="black", labelsize=font_size_out+4)
+        ax.tick_params('y', size=5, colors="black", labelsize=font_size_out+1)
+    
+        ax.set_ylabel(' ',  size=0)
+        ax.set_xlabel(ranking_variable,  size=font_size_out+6)
+    
+        ax.legend(bbox_to_anchor=(1.05, 1.05))
+    
+        plt.subplots_adjust(wspace=0.2, hspace=0.1)
+        plt.show()
 
 
 @metric(namespace="mammotheu", version="v003", python="3.11")
