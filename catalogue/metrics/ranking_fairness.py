@@ -23,17 +23,27 @@ class Fairness_metrics_in_rankings:
         assert len(sensitive) == 2
 
         dataset = data_csv_rankings(path)
-        Dataframe_ranking = model(dataset, 'Value')
-
+        Dataframe_ranking = model(dataset,ranking_variable)
+        Dataframe_ranking = Dataframe_ranking[~Dataframe_ranking[sensitive_attribute].isnull()]
+    
+        sensitive_attribute ='Gender'
         rankings_per_attribute = {}
+        ranking = 'Ranking_'+ranking_variable
+        sensitive = list(set(Dataframe_ranking[sensitive_attribute]))
+        assert len(sensitive) == 2
+        
         for attribute_value in sensitive:
-            rankings_per_attribute[attribute] = list(
-                Dataframe_ranking[Dataframe_ranking[attribute] == attribute_value].Ranking)
-
-        self.EDr = np.round((sum([self.b(1 / (r + 1)) for r in Rankings_per_attribute[Protected_attirbute]]) - sum(
-            [self.b(1 / (r + 1)) for r in Rankings_per_attribute[Non_protected_attribute]])) / 2000, 2)
-
-        return self.EDr
+            rankings_per_attribute[attribute_value] = list(Dataframe_ranking[Dataframe_ranking[attribute] == attribute_value][ranking]
+                                                    )
+    
+        non_protected_attribute = [i for i in sensitive if i != protected_attirbute][0]
+    
+        ranking_position_protected_attribute = [b(1 / (r + 1)) for r in rankings_per_attribute[protected_attirbute]]
+        ranking_position_non_protected_attribute = [b(1 / (r + 1)) for r in rankings_per_attribute[non_protected_attribute]]
+    
+        Min_size = min(len(ranking_position_protected_attribute), len(ranking_position_non_protected_attribute))
+        EDr = np.round((sum(ranking_position_protected_attribute[:Min_size]) - sum(ranking_position_non_protected_attribute[:Min_size])), 2)
+        return EDr
 
     def create_box_plot_rankings(dataframe, hue_variable, ranking_variable, y_variable):  
         width = 0.6, font_size_out = 14, nrows = 1, ncols = 1
