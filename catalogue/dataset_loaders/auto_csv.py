@@ -75,7 +75,7 @@ def read_csv(url, **kwargs):
             os.makedirs(os.path.join(*path.split("/")[:-1]), exist_ok=True)
             _download(url, temp)
             _extract_nested_zip(temp, extract_to)
-    elif os.path.exists(url):
+    elif os.path.exists(url) or url.startswith("http"):
         path = url
     else:
         shortened = "/".join(url.split("/")[-4:])
