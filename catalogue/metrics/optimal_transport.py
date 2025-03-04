@@ -23,10 +23,7 @@ from aif360.sklearn.metrics import ot_distance
     ),
 )
 def optimal_transport(
-    dataset: Dataset,
-    model: Predictor,
-    sensitive: List[str],
-    threshold: float = 0.01
+    dataset: Dataset, model: Predictor, sensitive: List[str], threshold: float = 0.01
 ) -> HTML:
     """Creates an optimal transport evaluation based on the implementation provided by the AIF360 library.
     The evaluation computes the Wasserstein distance that reflects the cost of transforming the predictive
@@ -114,9 +111,17 @@ def optimal_transport(
                 text += f"<tr><td>{attr}</td><td>{k}</td><td>{v:.3f}</td></tr>"
         text += "</tbody></table></div>"
 
-    offenders = (f"<h2 class='text-danger'>Distances over threshold</h2>-"+"<br>-".join(set(offenders))) if offenders else "<i>No bias concerns found (this does not mean that there are none)</i>"
-    message = f'Bias detected' if worst_distance>threshold else f'No concern'
-    text = f"""
+    offenders = (
+        (
+            f"<h2 class='text-danger'>Distances over threshold</h2>-"
+            + "<br>-".join(set(offenders))
+        )
+        if offenders
+        else "<i>No bias concerns found (this does not mean that there are none)</i>"
+    )
+    message = f"Bias detected" if worst_distance > threshold else f"No concern"
+    text = (
+        f"""
     <div class="container mt-4">
         <h1 class={"text-danger" if worst_distance>=threshold else "text-primary"}>{message}</h1>
         <p>
@@ -126,9 +131,13 @@ def optimal_transport(
             Differences more than the manually provided threshold {threshold:.3f} are considered to indicate bias.
         </p>
     </div>
-    """ + text + f""""<div class="container">{offenders}</div>""" + """
+    """
+        + text
+        + f""""<div class="container">{offenders}</div>"""
+        + """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     """
+    )
 
     return HTML(text)

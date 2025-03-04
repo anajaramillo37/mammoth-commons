@@ -24,7 +24,7 @@ def test_researchers_ranking_comparison():
             sampling_attribute="Nationality_IncomeGroup",
             ranking_variable="Degree",
             sensitive=["Gender"],
-            protected="female"
+            protected="female",
         )
         analysis_outcome_mitigation.show()
 

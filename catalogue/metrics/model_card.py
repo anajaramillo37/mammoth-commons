@@ -74,11 +74,15 @@ def model_card(
     assert len(sensitive) != 0, "At least one sensitive attribute should be selected"
     predictions = model.predict(dataset, sensitive)
     labels = dataset.labels
-    sensitive = fb.Dimensions({attr: categories @ dataset.data[attr] for attr in sensitive})
+    sensitive = fb.Dimensions(
+        {attr: categories @ dataset.data[attr] for attr in sensitive}
+    )
 
     if intersectional:
         sensitive = sensitive.intersectional()
-    report_type = fb.reports.pairwise if compare_groups == "Pairwise" else fb.reports.vsall
+    report_type = (
+        fb.reports.pairwise if compare_groups == "Pairwise" else fb.reports.vsall
+    )
 
     if labels is not None and hasattr(labels, "columns"):
         labels = labels[labels.columns[0]]
@@ -91,7 +95,9 @@ def model_card(
 
     report = report_type(predictions=predictions, labels=labels, sensitive=sensitive)
     minimum_shown_deviation = float(minimum_shown_deviation)
-    assert 0 <= minimum_shown_deviation <= 1, "Minimum shown deviation should be in the range [0,1]"
+    assert (
+        0 <= minimum_shown_deviation <= 1
+    ), "Minimum shown deviation should be in the range [0,1]"
     if minimum_shown_deviation != 0:
         report = report.filter(fb.investigate.DeviationsOver(minimum_shown_deviation))
 
@@ -100,14 +106,17 @@ def model_card(
         "Stamps": report.filter(fb.investigate.Stamps).show(
             env=fb.export.Html(view=False, filename=None), depth=1
         ),
-        "Full report": report.show(env=fb.export.Html(view=False, filename=None), depth=2),
+        "Full report": report.show(
+            env=fb.export.Html(view=False, filename=None), depth=2
+        ),
     }
     # Generate tabbed HTML content
     tab_headers = "".join(
         f'<button class="tablinks" data-tab="{key}">{key}</button>' for key in views
     )
     tab_contents = "".join(
-        f'<div id="{key}" class="tabcontent">{value}</div>' for key, value in views.items()
+        f'<div id="{key}" class="tabcontent">{value}</div>'
+        for key, value in views.items()
     )
 
     dataset_desc = ""
@@ -121,7 +130,7 @@ def model_card(
         else:
             raise Exception("Dataset description must be a string or a dictionary.")
 
-    html_content = f'''
+    html_content = f"""
        <style>
            .tablinks {{
                background-color: #ddd;
@@ -166,7 +175,7 @@ def model_card(
                }}
            }});
        </script>
-       <h1>Report</h1>
+       <h1>{f'Report over {len(sensitive.branches())} groups' if minimum_shown_deviation==0 else f'Report over {len(sensitive.branches())} groups for {minimum_shown_deviation:.3f} deviations'}</h1>
        <p>A report was computed over several prospective biases. 
        The following {len(sensitive.branches())} protected groups were analysed: <i>{', '.join(sensitive.branches().keys())}</i>.
        </p><p>Several values are computed to paint a broad picture
@@ -175,6 +184,6 @@ def model_card(
        <div>{tab_headers}</div>
        {tab_contents}
        {dataset_desc}
-       '''
+       """
 
     return HTML(html_content)

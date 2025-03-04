@@ -164,7 +164,12 @@ class Dashboard(Styled):
         sorted_items = list(
             sorted(
                 enumerate(self.runs),
-                key=lambda x: x[1]["description"] + x[1].get("dataset", dict()).get("module", "") + x[1].get("model", dict()).get("module", "") + x[1].get("analysis", dict()).get("module", "") + x[1]["status"] + x[1]["timestamp"],
+                key=lambda x: x[1]["description"]
+                + x[1].get("dataset", dict()).get("module", "")
+                + x[1].get("model", dict()).get("module", "")
+                + x[1].get("analysis", dict()).get("module", "")
+                + x[1]["status"]
+                + x[1]["timestamp"],
             )
         )
         sorted_items = [
@@ -203,7 +208,19 @@ class Dashboard(Styled):
 
             formatted = format_run(run, simpler=True).lower()
             button_color = (
-                ("#ffbbbb" if "fail" in formatted or "bias" in formatted else ("#ddddff" if "report" in formatted or "scan" in formatted or "analysis" in formatted or "explanation" in formatted  else "#bbffbb"))
+                (
+                    "#ffbbbb"
+                    if "fail" in formatted or "bias" in formatted
+                    else (
+                        "#ddddff"
+                        if "report" in formatted
+                        or "audit" in formatted
+                        or "scan" in formatted
+                        or "analysis" in formatted
+                        or "explanation" in formatted
+                        else "#bbffbb"
+                    )
+                )
                 if run["status"] == "completed"
                 else "#ffffbb"
             )

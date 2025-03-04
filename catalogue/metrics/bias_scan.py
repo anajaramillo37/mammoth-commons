@@ -26,7 +26,9 @@ def bias_scan(
     model: Predictor,
     sensitive: List[str],
     penalty: float = 0.5,
-    scoring: mammoth.integration.Options("Bernoulli", "Gaussian", "Poisson", "BerkJones") = "Bernoulli"
+    scoring: mammoth.integration.Options(
+        "Bernoulli", "Gaussian", "Poisson", "BerkJones"
+    ) = "Bernoulli",
 ) -> HTML:
     """<p>Performs a scan for the most biased attribute intersection in the dataset.
     Any sensitive attributes that are already known will be <b>excluded</b> from the scan. That is, you can
@@ -49,10 +51,18 @@ def bias_scan(
     for label in dataset.labels:
         labels = pd.Series(dataset.labels[label])
         cats = [cat for cat in dataset.categorical if cat not in sensitive]
-        assert len(cats) != 0, "All categorical attributes are already considered sensitive"
+        assert (
+            len(cats) != 0
+        ), "All categorical attributes are already considered sensitive"
         X = dataset.data[cats]
-        ret = aif360bias_scan(X=X, y_true=labels, y_pred=predictions, overpredicted=False, scoring=scoring,
-                              penalty=penalty)
+        ret = aif360bias_scan(
+            X=X,
+            y_true=labels,
+            y_pred=predictions,
+            overpredicted=False,
+            scoring=scoring,
+            penalty=penalty,
+        )
         ret = ret[0]
         text += f'<h2 class="text-secondary">Prediction label: {label}</h2>'
         text += '<div class="table-responsive"><table class="table table-striped table-bordered table-hover mt-3">'
@@ -81,4 +91,3 @@ def bias_scan(
         """
 
     return HTML(text)
-

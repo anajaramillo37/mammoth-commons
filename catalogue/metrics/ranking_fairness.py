@@ -645,7 +645,9 @@ def exposure_distance_comparison(
     n_runs: int = 1,
     protected: str = "female",
     sampling_attribute: str = "Nationality_IncomeGroup",
-    ranking_variable: mammoth.integration.Options("Degree", "Citations", "Productivity") = "Degree"
+    ranking_variable: mammoth.integration.Options(
+        "Degree", "Citations", "Productivity"
+    ) = "Degree",
 ) -> HTML:
     """
     Compute the exposure distance between the protected and non-protected groups in the dataset and ranking.

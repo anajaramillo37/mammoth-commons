@@ -129,11 +129,20 @@ def sklearn_report(
 
     if intersectional:
         sensitive = sensitive.intersectional()
-    report_type = fb.reports.pairwise if compare_groups == "Pairwise" else fb.reports.vsall
+    report_type = (
+        fb.reports.pairwise if compare_groups == "Pairwise" else fb.reports.vsall
+    )
 
-    report = report_type(predictions=predictions, labels=y_test.to_numpy(), scores=scores, sensitive=sensitive)
+    report = report_type(
+        predictions=predictions,
+        labels=y_test.to_numpy(),
+        scores=scores,
+        sensitive=sensitive,
+    )
     minimum_shown_deviation = float(minimum_shown_deviation)
-    assert 0 <= minimum_shown_deviation <= 1, "Minimum shown deviation should be in the range [0,1]"
+    assert (
+        0 <= minimum_shown_deviation <= 1
+    ), "Minimum shown deviation should be in the range [0,1]"
     if minimum_shown_deviation != 0:
         report = report.filter(fb.investigate.DeviationsOver(minimum_shown_deviation))
 
@@ -142,14 +151,17 @@ def sklearn_report(
         "Stamps": report.filter(fb.investigate.Stamps).show(
             env=fb.export.Html(view=False, filename=None), depth=1
         ),
-        "Full report": report.show(env=fb.export.Html(view=False, filename=None), depth=2),
+        "Full report": report.show(
+            env=fb.export.Html(view=False, filename=None), depth=2
+        ),
     }
     # Generate tabbed HTML content
     tab_headers = "".join(
         f'<button class="tablinks" data-tab="{key}">{key}</button>' for key in views
     )
     tab_contents = "".join(
-        f'<div id="{key}" class="tabcontent">{value}</div>' for key, value in views.items()
+        f'<div id="{key}" class="tabcontent">{value}</div>'
+        for key, value in views.items()
     )
 
     dataset_desc = ""
@@ -163,7 +175,7 @@ def sklearn_report(
         else:
             raise Exception("Dataset description must be a string or a dictionary.")
 
-    html_content = f'''
+    html_content = f"""
        <style>
            .tablinks {{
                background-color: #ddd;
@@ -208,7 +220,7 @@ def sklearn_report(
                }}
            }});
        </script>
-       <h1>Report</h1>
+       <h1>{f'Audit of {len(sensitive.branches())} groups' if minimum_shown_deviation==0 else f'Audit of {len(sensitive.branches())} groups for {minimum_shown_deviation:.3f} deviations'}</h1>
        <p>A report was computed over several prospective biases
        when a {predictor} model is trained. 
        The following {len(sensitive.branches())} protected groups were analysed: <i>{', '.join(sensitive.branches().keys())}</i>.
@@ -218,5 +230,5 @@ def sklearn_report(
        <div>{tab_headers}</div>
        {tab_contents}
        {dataset_desc}
-       '''
+       """
     return HTML(html_content)
