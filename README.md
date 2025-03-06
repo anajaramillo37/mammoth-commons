@@ -20,6 +20,20 @@ runs the modules in your local machine.
 2. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
 3. Launch the local app with `python demonstrator/app.py`.
 
+<details><summary>WSL missing .so files</summary>
+    
+If you are in WSL, you are likely to get errors like this *ImportError: libGL.so.1: cannot open shared object file: No such file or directory*.
+Install common missing dependencies like this:
+
+```bash
+sudo apt update
+sudo apt install libgl1
+sudo apt install libxkbcommon-x11-0
+sudo apt install libegl1
+```
+
+</details>
+
 <details><summary>VSCode launch profile</summary>  
 
 ```json 
