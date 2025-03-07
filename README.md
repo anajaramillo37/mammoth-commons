@@ -26,13 +26,14 @@ runs the modules in your local machine.
 <details><summary>WSL missing .so files</summary>
     
 If you are in WSL, you are likely to get errors like this *ImportError: libGL.so.1: cannot open shared object file: No such file or directory*.
-Install common missing dependencies like this:
+This is due to the lack of a graphical environment. Install one like like below, including missing font symbols needed to properly display certain UI element.
 
 ```bash
 sudo apt update
-sudo apt install libgl1
-sudo apt install libxkbcommon-x11-0
-sudo apt install libegl1
+sudo apt install fonts-noto-color-emoji fonts-symbola
+sudo apt install libgl1 libxkbcommon-x11-0 libegl1 libnss3 libxcomposite1 \
+                 libxdamage1 libxrender1 libxrandr2 libxtst6 libxi6 libasound2 \
+                 libxkbfile-dev qt6-wayland libxcb-cursor0 libx11-xcb1 libxcb-xinerama0
 ```
 
 </details>
