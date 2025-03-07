@@ -16,7 +16,9 @@ runs the modules in your local machine.
 
 ## 🔬 Run locally
 
-1. Install Python 3.11 or later.
+*Depending on your operating system, replace `python` with `python3` below.*
+
+1. Install Python 3.11 or later. Make **sure** the version is appropriate with `python --version`.
 2. Download or clone this repository. Prefer working in a virtual environment.
 3. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
 4. Launch the local app with `python demonstrator/app.py`.
