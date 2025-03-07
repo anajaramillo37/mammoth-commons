@@ -16,9 +16,10 @@ runs the modules in your local machine.
 
 ## 🔬 Run locally
 
-1. Download or clone this repository. Prefer working in a virtual environment.
-2. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
-3. Launch the local app with `python demonstrator/app.py`.
+1. Install Python 3.11 or later.
+2. Download or clone this repository. Prefer working in a virtual environment.
+3. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
+4. Launch the local app with `python demonstrator/app.py`.
 
 <details><summary>WSL missing .so files</summary>
     
