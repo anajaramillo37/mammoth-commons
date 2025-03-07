@@ -16,9 +16,27 @@ runs the modules in your local machine.
 
 ## 🔬 Run locally
 
-1. Download or clone this repository. Prefer working in a virtual environment.
-2. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
-3. Launch the local app with `python demonstrator/app.py`.
+*Depending on your operating system, replace `python` with `python3` below.*
+
+1. Install Python 3.11 or later. Make **sure** the version is appropriate with `python --version`.
+2. Download or clone this repository. Prefer working in a virtual environment.
+3. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
+4. Launch the local app with `python demonstrator/app.py` or `python -m demonstrator.app`.
+
+<details><summary>WSL missing .so files</summary>
+    
+If you are in WSL, you are likely to get errors like this *ImportError: libGL.so.1: cannot open shared object file: No such file or directory*.
+This is due to the lack of a graphical environment. Install one like like below, including missing font symbols needed to properly display certain UI element.
+
+```bash
+sudo apt update
+sudo apt install fonts-noto-color-emoji fonts-symbola
+sudo apt install libgl1 libxkbcommon-x11-0 libegl1 libnss3 libxcomposite1 \
+                 libxdamage1 libxrender1 libxrandr2 libxtst6 libxi6 libasound2 \
+                 libxkbfile-dev qt6-wayland libxcb-cursor0 libx11-xcb1 libxcb-xinerama0
+```
+
+</details>
 
 <details><summary>VSCode launch profile</summary>  
 

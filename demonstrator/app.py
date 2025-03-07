@@ -1,11 +1,11 @@
 from PySide6.QtWidgets import QApplication, QMainWindow
 import sys
-from states.dashboard import Dashboard
-from states.step import load_all_runs
-from states.steps.dataset import SelectDataset
-from states.steps.model import SelectModel
-from states.steps.analysis import SelectAnalysis
-from states.results import Results
+from demonstrator.states.dashboard import Dashboard
+from demonstrator.states.step import load_all_runs
+from demonstrator.states.steps.dataset import SelectDataset
+from demonstrator.states.steps.model import SelectModel
+from demonstrator.states.steps.analysis import SelectAnalysis
+from demonstrator.states.results import Results
 from demonstrator.backend.loaders import registry
 from PySide6.QtWidgets import QStackedWidget, QWidget, QGraphicsOpacityEffect
 from PySide6.QtCore import (
@@ -16,13 +16,13 @@ from PySide6.QtCore import (
     Signal,
 )
 from PySide6.QtGui import QSurfaceFormat
+from PySide6.QtWebEngineCore import QWebEngineSettings
 
-
-fmt = QSurfaceFormat()
-fmt.setVersion(3, 3)  # OpenGL 3.3 or higher
-fmt.setProfile(QSurfaceFormat.CoreProfile)
-fmt.setDepthBufferSize(24)
-QSurfaceFormat.setDefaultFormat(fmt)
+#fmt = QSurfaceFormat()
+#fmt.setVersion(3, 3)  # OpenGL 3.3 or higher
+#fmt.setProfile(QSurfaceFormat.CoreProfile)
+#fmt.setDepthBufferSize(24)
+#QSurfaceFormat.setDefaultFormat(fmt)
 
 items = load_all_runs("history.json")
 import matplotlib
