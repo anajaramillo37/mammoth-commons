@@ -1,3 +1,8 @@
+import os
+
+os.environ["QT_QUICK_BACKEND"] = "software"
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
+
 from PySide6.QtWidgets import QApplication, QMainWindow
 import sys
 from demonstrator.states.dashboard import Dashboard
@@ -15,14 +20,15 @@ from PySide6.QtCore import (
     QPoint,
     Signal,
 )
-from PySide6.QtGui import QSurfaceFormat
-from PySide6.QtWebEngineCore import QWebEngineSettings
 
-#fmt = QSurfaceFormat()
-#fmt.setVersion(3, 3)  # OpenGL 3.3 or higher
-#fmt.setProfile(QSurfaceFormat.CoreProfile)
-#fmt.setDepthBufferSize(24)
-#QSurfaceFormat.setDefaultFormat(fmt)
+"""from PySide6.QtGui import QSurfaceFormat
+from PySide6.QtWebEngineCore import QWebEngineSettings
+fmt = QSurfaceFormat()
+fmt.setVersion(3, 3)  # OpenGL 3.3 or higher
+fmt.setProfile(QSurfaceFormat.CoreProfile)
+fmt.setDepthBufferSize(24)
+QSurfaceFormat.setDefaultFormat(fmt)
+"""
 
 items = load_all_runs("history.json")
 import matplotlib

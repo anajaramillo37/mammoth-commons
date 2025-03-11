@@ -225,7 +225,7 @@ class Dashboard(Styled):
                 else "#ffffbb"
             )
             run_button = QPushButton(self)
-            run_button.setFixedHeight(95)
+            run_button.setFixedHeight(75)
             button_label = QLabel(
                 format_run(run, simpler=has_same_next_tags or prev_has_same_next_tags),
                 run_button,
@@ -312,7 +312,7 @@ class Dashboard(Styled):
 
             if has_same_next_tags or prev_has_same_next_tags:
                 run_button.setContentsMargins(0, 0, 0, 0)
-                run_button.setFixedHeight(55)
+                run_button.setFixedHeight(35)
 
             # button_with_tags_layout.setSpacing(-5)  # Reduce spacing for overlap effect
             button_with_tags_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -351,5 +351,16 @@ def format_run(run, simpler=False):
     except Exception:
         match = ""
     if simpler:
-        return f'<div style="margin: 0px;font-size:20px;">{match}</div>Created at {run["timestamp"]}'
-    return f'<h1 style="margin: 0px;">{run["description"] if run["description"] else "[no info]"}</h1><div  style="margin: 0px;font-size:20px;">{match}</div>Created at {run["timestamp"]}'
+        return f"""
+        <div style="font-size: 20px;">
+            <span style="font-size: 14px;">{run["timestamp"]}</span>&nbsp;&nbsp;&nbsp;
+            {match}
+        </div>
+        """
+    return f"""
+        <h1 style="margin: 0px;">{run["description"] or "..."}</h1>
+        <div style="font-size: 20px;">
+            <span style="font-size: 14px;">{run["timestamp"]}</span>&nbsp;&nbsp;&nbsp;
+            {match}
+        </div>
+        """

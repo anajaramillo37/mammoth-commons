@@ -10,7 +10,8 @@ def model_torch(
     state_path: str = "",
     model_path: str = "",
     model_name: str = "model",
-    safe_libraries: str = "torch, torchvision",
+    safe_libraries: str = "numpy, torch, torchvision",
+    multiple_prediction_threshold: float = 0,
 ) -> Pytorch:
     """Loads a pytorch model that comprises a Python code initializing the
     architecture and a file of trained parameters. For safety, the architecture's
@@ -21,8 +22,10 @@ def model_torch(
         model_path: The path in which the architecture's initialization script resides. Alternatively, you may also just paste the initialization code in this field.
         model_name: The variable in the model path's script to which the architecture is assigned.
         safe_libraries: A comma-separated list of libraries that can be imported.
+        multiple_prediction_threshold: A decision threshold that treats outputs as separate classes. If this is set to zero (default), a softmax is applied to outputs. For binary classification, this is equivalent to setting the decision threshold at 0.5. Otherwise, each output is thresholded separately.
     """
 
+    multiple_prediction_threshold = float(multiple_prediction_threshold)
     model = safeexec(
         model_path,
         out=model_name,
@@ -32,4 +35,4 @@ def model_torch(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.load_state_dict(torch.load(state_path, map_location=device))
 
-    return Pytorch(model)
+    return Pytorch(model, threshold=multiple_prediction_threshold)

@@ -12,10 +12,15 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from .step import save_all_runs
 from .style import Styled
+from datetime import datetime
 
 
 def format_run(run):
     return "[" + run["timestamp"] + "] " + run["description"]
+
+
+def now():
+    return datetime.now().strftime("%y-%m-%d %H:%M")
 
 
 class Results(Styled):
@@ -154,6 +159,7 @@ class Results(Styled):
             return
         new_run = self.runs[-1].copy()
         new_run["status"] = "new"
+        new_run["timestamp"] = now()
         self.runs.append(new_run)
         self.stacked_widget.slideToWidget(1)
 

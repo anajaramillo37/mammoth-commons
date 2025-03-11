@@ -13,7 +13,8 @@ def model_torch2onnx(
     model_path: str = "",
     model_name: str = "model",
     input_size: tuple[int, int] = (224, 224),
-    safe_libraries: str = "torch, torchvision",
+    safe_libraries: str = "numpy, torch, torchvision",
+    multiple_prediction_threshold: float = 0,
 ) -> ONNX:
     """Loads a ONNX model that comprises a Python code initializing the
     architecture and a file of trained parameters. For safety, the architecture's
@@ -24,8 +25,10 @@ def model_torch2onnx(
         model_path: The path in which the architecture's initialization script resides. Alternatively, you may also just paste the initialization code in this field.
         model_name: The variable in the model path's script to which the architecture is assigned.
         safe_libraries: A comma-separated list of libraries that can be imported.
+        multiple_prediction_threshold: A decision threshold that treats outputs as separate classes. If this is set to zero (default), a softmax is applied to outputs. For binary classification, this is equivalent to setting the decision threshold at 0.5. Otherwise, each output is thresholded separately.
     """
 
+    multiple_prediction_threshold = float(multiple_prediction_threshold)
     model = safeexec(
         model_path,
         out=model_name,
@@ -33,17 +36,11 @@ def model_torch2onnx(
     )
 
     model.load_state_dict(torch.load(state_path, map_location="cpu"))
-    # Set the model to evaluation mode
     model.eval()
-
-    # Create a dummy input tensor for the specified input size
     dummy_input = torch.randn(1, 3, *input_size)
 
-    # Use a temporary file to save the ONNX model
     with tempfile.NamedTemporaryFile(suffix=".onnx", delete=False) as temp_file:
         onnx_model_path = temp_file.name
-
-        # Export the model to ONNX format and save it to the temporary file
         torch.onnx.export(
             model,
             dummy_input,
@@ -53,10 +50,6 @@ def model_torch2onnx(
             dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
         )
 
-    # Load the ONNX model using ONNX Runtime
-    onnx_model = ONNX(onnx_model_path)
-
-    # Optionally delete the temporary file after loading the model
+    onnx_model = ONNX(onnx_model_path, threshold=multiple_prediction_threshold)
     os.remove(onnx_model_path)
-
     return onnx_model

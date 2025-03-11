@@ -8,14 +8,20 @@ def get_predictions(threshold, embed1, embed2):
     embed1 = torch.nn.functional.normalize(embed1, p=2, dim=1)
     embed2 = torch.nn.functional.normalize(embed2, p=2, dim=1)
     diff = embed1 - embed2
-    dist = torch.sum(diff**2, dim=1)
+    dist = 1 - torch.exp(-torch.sum(diff**2, dim=1) / 2)
+    if threshold == 0:
+        threshold = 0.5
     predict_issame = (dist < threshold).int()
     return predict_issame
 
 
 class Pytorch(Predictor):
-    def __init__(self, model):
+    def __init__(self, model, threshold=0):
+        assert (
+            0 <= threshold < 1
+        ), "The model threshold should be either in the range (0,1) or zero to be automatically determined."
         self.model = model
+        self.threshold = threshold
 
     def predict(self, dataset, sensitive):
         import torch
@@ -37,8 +43,11 @@ class Pytorch(Predictor):
                     sens = batch[3]
                     output1 = model(input1)
                     output2 = model(input2)
-                    predictions = get_predictions(1.3, output1, output2)
+                    predictions = get_predictions(self.threshold, output1, output2)
                 else:
+                    assert (
+                        self.threshold == 0
+                    ), "The loaded dataset is not multiclass, and therefore does not accept models with non-zero thresholds."
                     inputs = batch[0].to(device)
                     targets = batch[1]
                     sens = batch[2]

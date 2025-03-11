@@ -17,7 +17,7 @@ def data_image_pairs(
     shuffle: bool = False,
     data_transform_path: str = "",
     transform_variable: str = "transform",
-    safe_libraries="torchvision",
+    safe_libraries="numpy,torch,torchvision",
 ) -> ImagePairs:
     """
     Loads image pairs declared in a CSV file.
