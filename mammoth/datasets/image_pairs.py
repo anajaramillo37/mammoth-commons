@@ -74,9 +74,7 @@ class ImagePairs(Dataset):
     def _get_input_size(self, transform):
         from torchvision import transforms
 
-        # Check for Resize transform in the composition
         for t in transform.transforms:
             if isinstance(t, transforms.Resize):
-                return t.size  # Return the size of the Resize transform
-        # Default to a common size if Resize is not found
-        return (224, 224)  # Default size
+                return t.size
+        return (224, 224)

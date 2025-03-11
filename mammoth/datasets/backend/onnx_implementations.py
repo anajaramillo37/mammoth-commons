@@ -30,9 +30,7 @@ class ONNXImageDataset:
         self.target = target
         self.sensitive = sensitive
         self.data_transform = data_transform
-        # Initialize ONNX runtime session
         self.ort_session = data_transform
-        # print(self.ort_session.get_inputs())
 
     def __len__(self):
         return len(self.data)

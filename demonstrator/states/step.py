@@ -20,6 +20,8 @@ import json
 import os
 import pandas as pd
 import csv
+
+import mammoth.externals
 from .style import Styled
 
 
@@ -313,6 +315,32 @@ class Step(Styled):
                         f"Select {name} columns",
                         input_widget,
                         (last_url, last_delimiter),
+                    )
+                )
+                helper = select_button
+        elif "library" in name or "libraries" in name:
+            input_widget = QLineEdit(self)
+            input_widget.setText(str(default) if default != "None" else "")
+            if self.last_url is not None:
+                select_button = QPushButton("...")
+                select_button.setToolTip("Select from options")
+                select_button.setFixedSize(30, 20)
+                select_button.setStyleSheet(
+                    f"""
+                    QPushButton {{
+                        background-color: #dddd88; 
+                        border-radius: 5px;
+                    }}
+                    QPushButton:hover {{
+                        background-color: {self.highlight_color('#dddd88')};
+                    }}"""
+                )
+                last_url = self.last_url
+                select_button.clicked.connect(
+                    lambda: self.open_sensitive_modal(
+                        f"Select {name}",
+                        input_widget,
+                        mammoth.externals.get_import_list(last_url.text())
                     )
                 )
                 helper = select_button
