@@ -37,7 +37,7 @@ def data_image_pairs(
         shuffle: Whether to shuffle the dataset.
         data_transform_path: A path or implementation of a torchvision data transform. Alternatively, paste the transformation code here.
         transform_variable: The transformation target variable that should be extracted after the namesake code runs.
-        safe_libraries: A comma-separated list of safe libraries that are allowed in the transformation code.
+        safe_libraries: A comma-separated list of safe libraries that are allowed in the transformation code. As a safety measure against code injection attacks, an error will be created if libraries other than those are encountered.
     """
     batch_size = int(batch_size)
 
