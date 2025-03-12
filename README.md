@@ -23,7 +23,22 @@ runs the modules in your local machine.
 3. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
 4. Launch the local app with `python -m demonstrator.app`.
 
-<details><summary>WSL missing .so files</summary>
+<details><summary>Ubuntu: Example of full pipeline</summary>
+
+```bash
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+sudo apt install python3.11
+sudo apt install python3.11-pip
+sudo apt install python3.11-venv
+git clone git@github.com:mammoth-eu/mammoth-commons.git
+cd mammoth-commons
+python3.11 -m venv venv
+source venv/bin/activate
+```
+</details>
+
+<details><summary>Windows: WSL missing .so files</summary>
     
 If you are in WSL, you are likely to get errors like this *ImportError: libGL.so.1: cannot open shared object file: No such file or directory*.
 This is due to the lack of a graphical environment. Install one like like below, including missing font symbols needed to properly display certain UI element.
