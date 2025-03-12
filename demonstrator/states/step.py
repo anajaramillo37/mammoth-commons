@@ -340,7 +340,7 @@ class Step(Styled):
                     lambda: self.open_sensitive_modal(
                         f"Select {name}",
                         input_widget,
-                        mammoth.externals.get_import_list(last_url.text())
+                        mammoth.externals.get_import_list(last_url.text()),
                     )
                 )
                 helper = select_button
