@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QThread, Signal, QMutex
-from demonstrator.backend.loaders import registry
+from mai.backend.loaders import registry
 import traceback
-from demonstrator.states.step import Step, save_all_runs
+from mai.states.step import Step, save_all_runs
 
 
 global items

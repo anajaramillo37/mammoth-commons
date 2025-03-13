@@ -5,13 +5,13 @@ os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 import sys
-from demonstrator.states.dashboard import Dashboard
-from demonstrator.states.step import load_all_runs
-from demonstrator.states.steps.dataset import SelectDataset
-from demonstrator.states.steps.model import SelectModel
-from demonstrator.states.steps.analysis import SelectAnalysis
-from demonstrator.states.results import Results
-from demonstrator.backend.loaders import registry
+from mai.states.dashboard import Dashboard
+from mai.states.step import load_all_runs
+from mai.states.steps.dataset import SelectDataset
+from mai.states.steps.model import SelectModel
+from mai.states.steps.analysis import SelectAnalysis
+from mai.states.results import Results
+from mai.backend.loaders import registry
 from PySide6.QtWidgets import QStackedWidget, QWidget, QGraphicsOpacityEffect
 from PySide6.QtCore import (
     QEasingCurve,

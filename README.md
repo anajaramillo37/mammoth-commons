@@ -12,18 +12,17 @@ It also hosts a catalogue of dataset loaders, model loaders, and fairness analys
 and mitigation modules. Finally, find ad desktop application that 
 runs the modules in your local machine.
 
-![logo](demonstrator/logo.png)
+![logo](mai/logo.png)
 
 ## 🔬 Run locally
 
 *Depending on your operating system, replace `python` with `python3` below.*
 
-1. Install Python 3.11 or later. Make **sure** the version is appropriate with `python --version`.
-2. Download or clone this repository. Prefer working in a virtual environment.
-3. Install dependencies with `pip install -r requirements[test].txt`. This can take a bit of time.
-4. Launch the local app with `python -m demonstrator.app`.
+1. Install Python 3.11 or later. Make **sure** with `python --version`. Prefer a virtual environment.
+3. Install with `pip install mai-bias`. This will take time as all supported AI tools are installed.
+4. Launch the desktop app with `python -m mai.bias`.
 
-<details><summary>Ubuntu: Example of full pipeline</summary>
+<details><summary>Ubuntu: Example of full installation pipeline</summary>
 
 ```bash
 sudo add-apt-repository ppa:deadsnakes/ppa -y
@@ -31,10 +30,10 @@ sudo apt update
 sudo apt install python3.11
 sudo apt install python3.11-pip
 sudo apt install python3.11-venv
-git clone git@github.com:mammoth-eu/mammoth-commons.git
-cd mammoth-commons
-python3.11 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
+python3 install mai-bias
+python3 -m mai.bias
 ```
 </details>
 

@@ -29,7 +29,7 @@ from catalogue.metrics.Multi_objective_report import Multi_objective_report
 from catalogue.metrics.optimal_transport import optimal_transport
 from catalogue.metrics.bias_scan import bias_scan
 
-from demonstrator.backend.registry import Registry
+from mai.backend.registry import Registry
 
 registry = Registry(desktopmode=False)
 

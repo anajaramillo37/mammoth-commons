@@ -8,7 +8,7 @@ import setuptools
 
 
 with open("README.md", "r") as file:
-    long_description = file.read()
+    long_description = "Quickly develop modules for the MAI-BIAS toolkit.\nFor more information visit the [homepage](https://github.com/mammoth-eu/mammoth-commons)."
 
 with open("requirements.txt", "r") as file:
     deployment_requirements = file.read().splitlines()
@@ -18,14 +18,14 @@ with open("requirements[test].txt", "r") as file:
 
 setuptools.setup(
     name="MAMMOth-commons",
-    version="0.0.41",  # DON'T FORGET TO CHANGE THIS IN integration.py
+    version="0.0.45",  # DON'T FORGET TO CHANGE THIS IN integration.py
     author="Emmanouil (Manios) Krasanakis",
     author_email="maniospas@hotmail.com",
     description="Component interfaces of the MAMMOth fairness toolkit.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/mammoth-eu/mammoth-commons",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include="mammoth"),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
