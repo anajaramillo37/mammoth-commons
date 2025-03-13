@@ -24,3 +24,4 @@ __pycache__/**
 component_metadata
 **/component_metadata
 local_outputs
+canary/
