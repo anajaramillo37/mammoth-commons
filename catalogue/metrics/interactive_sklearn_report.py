@@ -115,7 +115,7 @@ def sklearn_report(
     if predictor == "Logistic regression":
         from sklearn.linear_model import LogisticRegression
 
-        model = LogisticRegression(max_iter=10000)
+        model = LogisticRegression(max_iter=1000)
     else:
         from sklearn.naive_bayes import GaussianNB
 

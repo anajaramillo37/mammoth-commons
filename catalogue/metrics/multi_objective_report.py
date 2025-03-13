@@ -71,8 +71,6 @@ def multi_objective_report(
     dataset: CSV,
     model: ONNXEnsemble,
     sensitive: List[str],
-    intersectional: bool = False,
-    compare_groups: Options("Pairwise", "To the total population") = None,
 ) -> HTML:
     """<p>This module presents an interactive <a href="https://plotly.com/python/3d-charts/" target="_blank">Plotly 3D plot</a>
     visualizing multiple objectives to evaluate model fairness and performance trade-offs. The report highlights three
@@ -92,10 +90,6 @@ def multi_objective_report(
     style="display: inline-block; padding: 10px;"> <i class="bi bi-exclamation-triangle-fill"></i> The multi-objective
     report generates predictions at each step of the partial ensemble. This may result in slower processing
     times when the number of Pareto solutions is high.</span>
-
-
-    Args:
-        No params: This module does not currently require any input parameters.
     """
 
     # obtain predictions

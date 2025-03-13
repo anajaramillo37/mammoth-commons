@@ -25,7 +25,7 @@ from catalogue.metrics.image_bias_analysis import image_bias_analysis
 from catalogue.metrics.xai_analysis import facex_regions
 from catalogue.metrics.xai_analysis_embeddings import facex_embeddings
 from catalogue.metrics.ranking_fairness import exposure_distance_comparison
-from catalogue.metrics.Multi_objective_report import Multi_objective_report
+from catalogue.metrics.multi_objective_report import multi_objective_report
 from catalogue.metrics.optimal_transport import optimal_transport
 from catalogue.metrics.bias_scan import bias_scan
 
@@ -69,7 +69,7 @@ registry.analysis(bias_scan)
 registry.analysis(image_bias_analysis)
 registry.analysis(facex_regions)
 registry.analysis(facex_embeddings)
-registry.analysis(Multi_objective_report)
+registry.analysis(multi_objective_report)
 registry.analysis(
     exposure_distance_comparison,
     compatible=[model_mitigation_ranking],
