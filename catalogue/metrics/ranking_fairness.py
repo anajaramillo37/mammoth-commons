@@ -18,27 +18,53 @@ import networkx as nx
 
 
 def b(k):
-    """Function defining the position bias. the highest ranked candidates receive more attention from users than candidates at lower ranks,
-    and here is adoptedwith algorithmic discount with smooth reduction and favorable theoretical properties
-    (https://proceedings.mlr.press/v30/Wang13.html)."""
+    """Calculate the position bias based on the rank of candidates.
+
+    The position bias reflects the idea that higher-ranked candidates receive more attention from users than those at lower ranks.
+    This function implements an algorithmic discount where the attention given to a candidate decreases logarithmically with its rank.
+    The implementation follows the principles described in the paper "Position Bias in Information Retrieval" 
+    (https://proceedings.mlr.press/v30/Wang13.html), emphasizing a smooth reduction in attention with favorable theoretical properties.
+    
+    Args:
+        k (int or float): The rank (1-based index) of the candidate. Must be a non-negative integer.
+        
+    Returns:
+        float: The position bias value for the given rank, computed as 1 divided by the logarithm base 2 of (k + 1).
+               This results in higher values for lower ranks and decreases logarithmically as the rank increases.
+    """
+    # Returning the position bias value calculated using the logarithmic formula.
     return 1 / np.log2(k + 1)
 
 
 def Exposure_distance(
     dataset, ranking_variable, sensitive_attribute, protected_attirbute
 ):
-    """Exposure distance to see where are the two groups located in the ranking"""
+   """
+    Calculate the exposure distance between two groups based on a ranking variable.
+
+    This function computes the difference in rankings between a protected attribute group
+    and a non-protected attribute group to assess their relative positioning in the rankings.
+
+    Parameters:
+    dataset (DataFrame): A pandas DataFrame containing the data to analyze.
+    ranking_variable (str): The name of the ranking variable column to evaluate.
+    sensitive_attribute (str): The name of the column that indicates the sensitive attribute (e.g., gender).
+    protected_attirbute (str): The value of the sensitive attribute that is considered protected.
+
+    Returns:
+    float: The exposure distance (EDr) between the two groups, or NaN if an exception occurs.
+    """
 
     # Remove rows with missing values in the sensitive attribute
-    # e.g.: If sensitive_attribute is "Gender", remove rows where Gender is missing or NaN or None
-    # TODO: check if this "rank first and then filter" approach is appropriate
-    dataset = dataset[~dataset[sensitive_attribute].isnull()]
+    # This step ensures that only complete entries for the sensitive_attribute are considered
+    dataset = dataset[~dataset[sensitive_attribute].isnull()] # Filter out NaN or None values
 
-    rankings_per_attribute = {}
-    sensitive = list(set(dataset[sensitive_attribute]))
+    rankings_per_attribute = {}  # Dictionary to hold rankings for each attribute value
+    sensitive = list(set(dataset[sensitive_attribute])) # Unique values of the sensitive attribute
     try:
-        assert len(sensitive) == 2
+        assert len(sensitive) == 2 # Ensure there are exactly two groups to compare
 
+         # Populate the rankings_per_attribute dictionary
         for attribute_value in sensitive:
             rankings_per_attribute[attribute_value] = list(
                 dataset[dataset[sensitive_attribute] == attribute_value][
@@ -46,8 +72,10 @@ def Exposure_distance(
                 ]
             )
 
+        # Identify the non-protected attribute group
         non_protected_attribute = [i for i in sensitive if i != protected_attirbute][0]
 
+        # Compute ranking positions for the protected and non-protected attributes
         ranking_position_protected_attribute = [
             b(1 / (r + 1)) for r in rankings_per_attribute[protected_attirbute]
         ]
@@ -55,10 +83,13 @@ def Exposure_distance(
             b(1 / (r + 1)) for r in rankings_per_attribute[non_protected_attribute]
         ]
 
+        # Determine the minimum size for comparison to prevent index errors
         Min_size = min(
             len(ranking_position_protected_attribute),
             len(ranking_position_non_protected_attribute),
         )
+
+        # Calculate the exposure distance (EDr)
         EDr = np.round(
             (
                 sum(ranking_position_protected_attribute[:Min_size])
@@ -66,68 +97,106 @@ def Exposure_distance(
             ),
             2,
         )
+        
     except Exception as e:
-        print("Exception")
-        EDr = np.nan
+        print("Exception") # Print the exception for debugging
+        EDr = np.nan # Set exposure distance to NaN if an error occurs
     return EDr
 
 
 def boxplots_rankings(dataframe, hue_variable, ranking_variable, y_variable):
-    # Set figure size based on number of categories
-    n_categories = len(dataframe[y_variable].unique())
-    height = min(7, max(4, n_categories * 0.5))  # Adaptive height
+    """
+    Create and display a boxplot for the specified ranking and y variables, 
+    differentiated by the hue variable. The plot adapts its height based on 
+    the number of unique categories in the y variable. 
 
+    Parameters:
+    - dataframe (pd.DataFrame): The source dataset containing the data to plot.
+    - hue_variable (str): The name of the column in the dataframe to use for color encoding (hue).
+    - ranking_variable (str): The name of the column in the dataframe that represents the ranking.
+    - y_variable (str): The name of the column in the dataframe to be displayed on the y-axis.
+
+    Returns:
+    - str: A base64 encoded string representation of the generated plot image.
+    """
+    
+    # Set figure size based on the number of unique categories in the y_variable
+    n_categories = len(dataframe[y_variable].unique())
+    height = min(7, max(4, n_categories * 0.5))  # # Adaptive height between 4 and 7 inches
+
+    # Enable tight layout for the figure
     plt.rcParams["figure.autolayout"] = True
 
+    # Create a new figure and axis with specified size
     fig, ax = plt.subplots(figsize=(8, height), constrained_layout=True)
 
+    # Create a boxplot using seaborn with specified parameters
     sns.boxplot(
         data=dataframe,
-        x=ranking_variable,
-        y=y_variable,
-        hue=hue_variable,
-        order=sorted(dataframe[y_variable].unique()),
-        saturation=0.7,
-        linewidth=0.75,
-        fliersize=3,
-        ax=ax,
+        x=ranking_variable, # Set the x-axis variable based on rankings
+        y=y_variable, # Set the y-axis variable
+        hue=hue_variable, # Set color grouping based on the hue variable
+        order=sorted(dataframe[y_variable].unique()), # Sort the y variable categories
+        saturation=0.7, # Set color saturation
+        linewidth=0.75, # Set box line width
+        fliersize=3, # Size of the outlier markers
+        ax=ax, # Specify the axis to plot on
     )
 
+    # Hide the right and top spines for cleaner appearance
     ax.spines[["right", "top"]].set_visible(False)
 
-    # Adjust labels and ticks
+    # Adjust the size of the tick labels on both axes
     ax.tick_params(axis="both", labelsize=9)
-    ax.tick_params(axis="x", rotation=0)
+    ax.tick_params(axis="x", rotation=0) # Keep x-axis labels horizontal
 
-    # Move legend to a better position if there's room
+     # Adjust legend position based on plot height
     if height > 5:
-        ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+        ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left") # Legend outside the plot
     else:
-        ax.legend(bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=2)
+        ax.legend(bbox_to_anchor=(0.5, -0.15), loc="upper center", ncol=2) # Legend centered below plot
 
+    # Enable grid on the y-axis for better visibility of values
     ax.yaxis.grid(True, linestyle="--", alpha=0.7)
 
+    # Set margins for the y-axis
     plt.margins(y=0.02)
 
-    # Save and encode
+    # Close the figure to prevent it from displaying, then encode the figure in base64
     plt.close(fig)
-    return get_base64_encoded_image(fig)
+    return get_base64_encoded_image(fig)  # Return base64-encoded image of the figure
 
 
 def boxplots_mitigation_strategies_pretty(
     ER_Old, ER_Mitigation, Method, sampling_attribute=None, n_runs=1
 ):
-    """Compare the old results with possible mitigation strategies"""
-    plt.rcParams["mathtext.fontset"] = "dejavusans"
-    plt.rcParams["figure.autolayout"] = True
+    """Generate a boxplot comparing the old results with various mitigation strategies.
+    
+    Args:
+        ER_Old: A dictionary or similar structure containing old exposure results for comparison.
+        ER_Mitigation: A dictionary containing mitigation strategies and their corresponding exposure results.
+        Method: A string indicating which mitigation strategy to visualize (e.g., 'Statistical_parity', 'Equal_parity').
+        sampling_attribute: Optional. If provided, it will be used to categorize the boxplots on the x-axis.
+        n_runs: Optional. The number of runs for sampling when `sampling_attribute` is provided.
 
-    width = 0.6
-    font_size_out = 14
+    Returns:
+        A base64 encoded string of the generated figure for use in web applications or reports.
+    """
 
+    # Set plot aesthetics
+    plt.rcParams["mathtext.fontset"] = "dejavusans" # Use DejaVu Sans font for text
+    plt.rcParams["figure.autolayout"] = True # Automatically adjust subplot parameters such that the subplot(s) fits in to the figure area
+
+    width = 0.6 # Set the width for the boxplot
+    font_size_out = 14 # Set the font size for output text
+
+    # Create a figure and axes object for plotting
     fig, axes = plt.subplots(figsize=(10, 7), constrained_layout=True)
 
+    # Define color mappings for boxplots based on methods
     Colors_boxplots = {"Statistical_parity": "darkblue", "Equal_parity": "gold"}
 
+    # Properties for the boxplot elements (boxes, medians, whiskers, caps)
     PROPS = {
         "boxprops": {"facecolor": "none", "edgecolor": Colors_boxplots[Method]},
         "medianprops": {"color": Colors_boxplots[Method]},
@@ -135,6 +204,7 @@ def boxplots_mitigation_strategies_pretty(
         "capprops": {"color": Colors_boxplots[Method]},
     }
 
+    # Creating the DataFrame for mitigation strategies without sampling attribute
     if sampling_attribute == None:
         ER_Mitigation_DF = pd.DataFrame(ER_Mitigation.values(), columns=["ER_run"])
         sns.boxplot(
@@ -146,7 +216,7 @@ def boxplots_mitigation_strategies_pretty(
             ax=axes,
             **PROPS,
         )
-    else:
+    else: # Creating the DataFrame with the sampling attribute
         ER_Mitigation_DF = pd.DataFrame(
             {
                 sampling_attribute: [
@@ -166,31 +236,31 @@ def boxplots_mitigation_strategies_pretty(
             **PROPS,
         )
 
-    # Add scatter plots
+    # Add scatter plots for old exposure results
     if sampling_attribute == None:
-        plt.scatter(0, ER_Old, color="purple", s=60, alpha=0.7)
+        plt.scatter(0, ER_Old, color="purple", s=60, alpha=0.7) # Plot point for old exposure result
     else:
         plt.scatter(
             range(len(ER_Old)), list(ER_Old.values()), color="purple", s=60, alpha=0.7
-        )
+        ) # Scatter points for each old result
 
-    # Style the axes
+     # Style the axes by hiding specific spines
     for spine in ["right", "top"]:
         axes.spines[spine].set_visible(False)
 
-    # Adjust tick parameters
+    # Adjust tick parameters for x-axis and y-axis
     axes.tick_params(
         "x", size=5, colors="black", labelsize=11, rotation=45
-    )  # Reduced rotation
+    )  # Customize appearance of x-axis ticks
     axes.tick_params("y", size=2, colors="black", labelsize=11)
 
-    # Label axes
+    # Label axes with descriptions
     axes.set_ylabel(
         "Exposure distance women\nposition vs men position", size=12, labelpad=10
     )
-    axes.set_xlabel(" ", size=0)
+    axes.set_xlabel(" ", size=0) # Keep x-axis label empty
 
-    # Add grid lines
+    # Add horizontal dashed lines at specific y-ticks for better readability
     y_ticks = [float(str(i).split(", ")[1]) for i in axes.get_yticklabels()][2:-1]
     for l in y_ticks:
         if sampling_attribute == None:
@@ -198,10 +268,10 @@ def boxplots_mitigation_strategies_pretty(
         else:
             axes.hlines(l, -0.5, len(ER_Old) - 0.5, "darkgrey", lw=1, ls="--")
 
-    # Adjust margins to prevent cutoff
+    # Adjust margins to prevent cutoff of the plot elements
     plt.margins(y=0.1)
 
-    # Save and encode
+    # Close the figure and encode it to base64 format for output
     plt.close(fig)
     enc_str = get_base64_encoded_image(fig)
     return enc_str
