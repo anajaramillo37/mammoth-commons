@@ -3,6 +3,7 @@ import os
 os.environ["QT_QUICK_BACKEND"] = "software"
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
+
 from PySide6.QtWidgets import QApplication, QMainWindow
 import sys
 from mai.states.dashboard import Dashboard

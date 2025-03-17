@@ -18,8 +18,8 @@ import networkx as nx
 
 
 def b(k):
-    """Function defining the position bias. the highest ranked candidates receive more attention from users than candidates at lower ranks, 
-    and here is adoptedwith algorithmic discount with smooth reduction and favorable theoretical properties 
+    """Function defining the position bias. the highest ranked candidates receive more attention from users than candidates at lower ranks,
+    and here is adoptedwith algorithmic discount with smooth reduction and favorable theoretical properties
     (https://proceedings.mlr.press/v30/Wang13.html)."""
     return 1 / np.log2(k + 1)
 

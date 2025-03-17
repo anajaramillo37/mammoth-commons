@@ -146,7 +146,7 @@ class Results(Styled):
         reply = QMessageBox.question(
             self,
             "Edit?",
-            f"You can change modules and modify parameters of the analysis. "
+            f"Change modules and modify parameters of the analysis. "
             "However, this will also remove the results presented here. Consider creating a variation if you want to preserve current results.",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
@@ -169,7 +169,7 @@ class Results(Styled):
         reply = QMessageBox.question(
             self,
             "Delete?",
-            f"This will permanently remove the analysis and its outcome.",
+            f"Will permanently remove this analysis and its outcome.",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )

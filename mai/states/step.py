@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QDialog,
     QListWidget,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QLocale
 from PySide6.QtGui import QIntValidator, QDoubleValidator, QIcon
 import json
 import os
@@ -389,7 +389,10 @@ class Step(Styled):
             input_widget.setText(str(default) if default != "None" else "0")
         elif param_type == "float":
             input_widget = QLineEdit(self)
-            input_widget.setValidator(QDoubleValidator())
+            validator = QDoubleValidator()
+            validator.setLocale(QLocale("C"))
+            validator.setNotation(QDoubleValidator.StandardNotation)
+            input_widget.setValidator(validator)
             input_widget.setText(str(default) if default != "None" else "0.0")
         elif param_type == "bool":
             input_widget = QCheckBox(self)

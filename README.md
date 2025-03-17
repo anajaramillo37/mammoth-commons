@@ -45,9 +45,20 @@ This is due to the lack of a graphical environment. Install one like like below,
 ```bash
 sudo apt update
 sudo apt install fonts-noto-color-emoji fonts-symbola
-sudo apt install libgl1 libxkbcommon-x11-0 libegl1 libnss3 libxcomposite1 \
-                 libxdamage1 libxrender1 libxrandr2 libxtst6 libxi6 libasound2 \
-                 libxkbfile-dev qt6-wayland libxcb-cursor0 libx11-xcb1 libxcb-xinerama0
+sudo apt install libgl1
+sudo apt install libxkbcommon-x11-0
+sudo apt install libegl1
+sudo apt install libnss3
+sudo apt install libxcomposite1
+sudo apt install libxdamage1
+sudo apt install libxrender1
+sudo apt install libxrandr2
+sudo apt install libxtst6
+sudo apt install libxi6
+sudo apt install libasound2
+sudo apt install libxkbfile-dev
+sudo apt install --reinstall qt6-wayland libxcb-cursor0 libxkbcommon-x11-0
+sudo apt install libx11-xcb1 libxcb-xinerama0 libxcb-cursor0
 ```
 
 </details>

@@ -15,7 +15,7 @@ with open("requirements[test].txt") as file:
 
 setuptools.setup(
     name="MAI-Bias",
-    version="0.1.1",
+    version="0.1.2",
     author="Emmanouil (Manios) Krasanakis",
     author_email="maniospas@hotmail.com",
     description="Desktop app version of the MAI-Bias toolkit.",

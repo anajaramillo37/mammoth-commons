@@ -36,11 +36,11 @@ class Dashboard(Styled):
         new_button = self.create_icon_button(
             "➕", "#007bff", "New analysis", self.create_new_item
         )
-        new_button.setFixedSize(40, 40)
+        new_button.setFixedSize(36, 36)
 
         search_field = QLineEdit(self)
         search_field.setPlaceholderText("Search...")
-        search_field.setFixedWidth(200)
+        search_field.setFixedSize(200, 36)
         search_field.textChanged.connect(
             self.filter_runs
         )  # Connect to filtering method
@@ -136,7 +136,7 @@ class Dashboard(Styled):
         reply = QMessageBox.question(
             self,
             "Delete?",
-            f"Confirm the deletion of {format_run(self.runs[index])}.",
+            f"The analysis will be permanently deleted.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
