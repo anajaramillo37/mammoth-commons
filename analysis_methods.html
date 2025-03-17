@@ -315,10 +315,7 @@
                         </button>
 <br>
 <h2 id='multi-objective-report'>Multi objective report</h2>
-<p><p>This module presents an interactive <a href="https://plotly.com/python/3d-charts/" target=" blank">Plotly 3D plot</a> visualizing multiple objectives to evaluate model fairness and performance trade-offs. The report highlights three primary objectives: <b>accuracy loss</b>, <b>balanced accuracy loss</b>, and <b>discrimination (MMM-fairness) loss</b>. Each point plotted within the 3D space represents a <i>Pareto-optimal</i> solution, which achieves an optimal balance between these objectives where no single objective can improve without worsening another.</p>  <p>Users can hover over any solution point to display the corresponding loss values for each objective. Additionally, each point includes a <b>theta</b> value, indicating up to which sequence in the ONNX ensemble the particular solution is achieved. This allows users to observe performance changes throughout different stages of the ensemble, helping them better understand the trade-offs involved in each model configuration.</p>  <p><b>Disclaimer</b><br> <button type="button" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="top" title="The multi-objective report requires generating predictions at each step of the partial ensemble. This may result in slower processing times when the number of Pareto solutions is high." onclick="showDescriptionModal(this)"> <i class="bi bi-info-circle"></i> Note on Processing Time </button> </p> </p>
-<b>Parameters</b><br>Intersectional
-Compare groups
-<br>
+<p><p>This module presents an interactive <a href="https://plotly.com/python/3d-charts/" target=" blank">Plotly 3D plot</a> visualizing multiple objectives to evaluate model fairness and performance trade-offs. The report highlights three primary objectives: <b>accuracy loss</b>, <b>balanced accuracy loss</b>, and <b>discrimination (MMM-fairness) loss</b>. Each point plotted within the 3D space represents a <i>Pareto-optimal</i> solution, which achieves an optimal balance between these objectives where no single objective can improve without worsening another.</p>  <p>Users can hover over any solution point to display the corresponding loss values for each objective. Additionally, each point includes a <b>theta</b> value, indicating up to which sequence in the ONNX ensemble the particular solution is achieved. This allows users to observe performance changes throughout different stages of the ensemble, helping them better understand the trade-offs involved in each model configuration.</p>  <p><span class="alert alert-warning alert-dismissible fade show" role="alert" style="display: inline-block; padding: 10px;"> <i class="bi bi-exclamation-triangle-fill"></i> The multi-objective report generates predictions at each step of the partial ensemble. This may result in slower processing times when the number of Pareto solutions is high.</span></p> </p>
 <h2 id='exposure-distance-comparison'>Exposure distance comparison</h2>
 <p><p>Compute the exposure distance between the protected and non-protected groups in the dataset and ranking. Sensitive attributes is a comma-separated list of the attributes relevant for fairness analysis. WCurrently, only <em>Gender</em> is supported.</p> </p>
 <b>Parameters</b><br><button
@@ -331,17 +328,6 @@ Compare groups
                           data-name="N runs"
                           onclick="showDescriptionModal(this)">
                           <i class="bi bi-info-circle"></i> N runs
-                        </button>
-<button
-                          type="button"
-                          class="btn btn-light"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title=" The protected group for the fairness analysis. Currently, only *female* or *male* are supported."
-                          data-description=" The protected group for the fairness analysis. Currently, only *female* or *male* are supported."
-                          data-name="Protected"
-                          onclick="showDescriptionModal(this)">
-                          <i class="bi bi-info-circle"></i> Protected
                         </button>
 <button
                           type="button"
