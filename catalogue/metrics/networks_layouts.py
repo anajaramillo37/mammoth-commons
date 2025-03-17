@@ -41,23 +41,52 @@ __all__ = [
 
 
 def _process_params(G, center, dim):
-    # Some boilerplate code.
+    """
+    Process the input parameters for a graph and center coordinates.
+
+    This function ensures that the input graph G is a valid NetworkX graph,
+    creates an empty graph if it is not, and verifies that the center 
+    coordinates match the specified dimensionality.
+
+    Parameters:
+    G (nx.Graph or iterable): A NetworkX graph or a collection of nodes
+                              to create an empty graph from.
+    center (array-like or None): The coordinates for the center point.
+                                  If None, it defaults to an array of
+                                  zeros with length dim.
+    dim (int): The dimension that the center coordinates should match.
+
+    Returns:
+    tuple: A tuple containing:
+           - G (nx.Graph): The processed graph (either the original or an empty graph).
+           - center (np.ndarray): The processed center coordinates as a NumPy array.
+
+    Raises:
+    ValueError: If the length of center does not match the provided dim.
+    """
+
+    # Importing NumPy for array manipulations
     import numpy as np
 
+    # Check if G is a valid NetworkX graph. If not, create an empty graph.
     if not isinstance(G, nx.Graph):
-        empty_graph = nx.Graph()
-        empty_graph.add_nodes_from(G)
-        G = empty_graph
+        empty_graph = nx.Graph() # Create an empty graph object
+        empty_graph.add_nodes_from(G) # Add the nodes from the input G
+        G = empty_graph # Update G to the empty graph
 
+    # If center is None, initialize it to a zero vector of the specified dimension
     if center is None:
         center = np.zeros(dim)
     else:
+        # Convert the center to a NumPy array for consistency
         center = np.asarray(center)
 
+    # Validate that the length of center matches the specified dimension
     if len(center) != dim:
         msg = "length of center coordinates must match dimension of layout"
-        raise ValueError(msg)
+        raise ValueError(msg) # Raise an error if dimensions do not match
 
+    # Return the processed graph and the center coordinates
     return G, center
 
 
