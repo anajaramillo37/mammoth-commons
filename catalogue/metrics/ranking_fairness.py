@@ -276,31 +276,96 @@ def boxplots_mitigation_strategies_pretty(
     enc_str = get_base64_encoded_image(fig)
     return enc_str
 
-
-# Function to generate a base64 string from a matplotlib plot
 def get_base64_encoded_image(fig):
+    """
+    Generate a base64 encoded string from a matplotlib figure.
+    
+    Parameters:
+    fig (matplotlib.figure.Figure): The matplotlib figure object to be converted.
+
+    Returns:
+    str: A base64 encoded string representation of the figure in PNG format.
+    
+    This function captures the current state of the provided matplotlib figure,
+    saves it to a bytes buffer in PNG format, and then encodes that buffer 
+    into a base64 string for easy embedding in HTML or other formats.
+    
+    Note:
+    This function automatically closes the buffer after encoding to free up resources.
+    """
+    
+    # Create an in-memory bytes buffer to hold the image data
     buffer = BytesIO()
+
+    # Save the figure as a PNG image to the bytes buffer
     fig.savefig(buffer, format="png")
+
+    # Move the buffer cursor to the beginning
     buffer.seek(0)
+
+    # Read the buffer, encode the image to base64, and decode to a UTF-8 string
     img_str = base64.b64encode(buffer.read()).decode("utf-8")
+
+    # Close the bytes buffer
     buffer.close()
+
+    # Return the base64 encoded image string
     return img_str
 
 
 def image_to_base64(image_path):
+    """
+    Convert an image file to a base64 encoded string.
+
+    Args:
+        image_path (str): The file path of the image to be converted.
+
+    Returns:
+        str: A base64 encoded string representation of the image.
+        
+    Raises:
+        FileNotFoundError: If the specified image file does not exist.
+        IOError: If there is an error reading the image file.
+    """
+
+    # Open the image file in binary read mode
     with open(image_path, "rb") as image_file:
+        # Read the contents of the image file
+        # and encode it using base64
         return base64.b64encode(image_file.read()).decode()
 
 
 def generate_group_metrics_rows(ER_Old, ER_Mitigation, n_runs):
-    rows = []
+     """
+    Generate HTML table rows containing metrics for groups based on old rankings and mitigation values.
+
+    Args:
+        ER_Old (dict): A dictionary containing old fairness values for each group. 
+                       Each key represents a group, and the value is the old fairness metric.
+        ER_Mitigation (dict): A dictionary containing lists of mitigation values for each group.
+                              Each key represents a group, and the value is a list 
+                              of fairness metrics from multiple runs.
+        n_runs (int): The number of runs, which is the length of mitigation values for each group.
+
+    Returns:
+        str: A string containing HTML table row elements for each group with their respective metrics.
+    """
+    
+    rows = [] # Initialize an empty list to hold the generated HTML rows
+
     for group in ER_Old.keys():
+        # Extract the mitigation values for the current group across all runs
         mitigation_values = [ER_Mitigation[group][r] for r in range(n_runs)]
+
+        # Calculate the mean fairness value for the group
         mean_fair = sum(mitigation_values) / len(mitigation_values)
+
+        # Calculate the standard deviation of the mitigation values; if only one value, return 0
         std_fair = (
             statistics.stdev(mitigation_values) if len(mitigation_values) > 1 else 0
         )
 
+        # Create an HTML table row for the current group including the metrics
         row = f"""
         <tr>
             <td>{group}</td>
@@ -309,16 +374,38 @@ def generate_group_metrics_rows(ER_Old, ER_Mitigation, n_runs):
             <td>{std_fair:.2f}</td>
         </tr>
         """
-        rows.append(row)
-    return "\n".join(rows)
+        rows.append(row) # Append the generated row to the list of rows
+        
+    return "\n".join(rows) # Join all rows into a single string and return
 
 
 def generate_group_stats(dataset, sampling_attribute):
+     """
+    Generate a summary of researcher counts for each unique value in a specified attribute of the dataset.
+
+    Args:
+        dataset (DataFrame): A pandas DataFrame containing at least one column corresponding to the sampling attribute.
+        sampling_attribute (str): The name of the column in the dataset to group by and count researchers.
+
+    Returns:
+        str: A formatted string containing HTML paragraph elements with counts of researchers for each unique value
+              in the specified sampling attribute, excluding NaN values.
+    """
+    # Initialize an empty list to store the formatted statistics for each group
     stats = []
+
+    # Extract unique values of the specified attribute, excluding NaN values
     unique_values = [x for x in dataset[sampling_attribute].unique() if pd.notna(x)]
+
+    # Sort the unique values to ensure consistent ordering
     for group in sorted(unique_values):
+        # Count the number of researchers in the dataset belonging to the current group
         count = len(dataset[dataset[sampling_attribute] == group])
+
+        # Append a formatted string with the group name and count to the stats list
         stats.append(f"<p>{group}: {count} researchers</p>")
+
+    # Join all formatted strings into a single string and return it
     return "\n".join(stats)
 
 
@@ -598,32 +685,53 @@ def generate_html_fragment(
     distribution_img_str,
     n_runs,
 ):
-    # Calculate summary statistics
+     """
+    Generates an HTML fragment displaying statistical visualizations and metrics.
+
+    Args:
+        ranking_variable (str): The variable used for ranking groups in the analysis.
+        ER_Old (dict): A dictionary containing old equity ratio values for different groups.
+        ER_Mitigation (dict): A dictionary containing mitigation equity ratio values for different groups for several runs.
+        boxplot_img_str (str): HTML string representation of the boxplot image.
+        network_img_str (str): HTML string representation of the network image.
+        normal_distribution_img_str (str): HTML string representation of the normal distribution image.
+        distribution_img_str (str): HTML string representation of the overall distribution image.
+        n_runs (int): The number of simulation runs used for calculating averages.
+
+    Returns:
+        str: An HTML fragment containing the visualizations and statistical summaries.
+    """
+    
+    # Calculate the maximum disparity in the old equity ratios by subtracting min from max
     max_disparity_old = max(ER_Old.values()) - min(ER_Old.values())
+
+    # Calculate the mean mitigation equity ratio for each group over the specified runs
     mean_mitigation_by_group = {
         group: statistics.mean([ER_Mitigation[group][r] for r in range(n_runs)])
         for group in ER_Old.keys()
     }
+
+    # Calculate the maximum disparity in the new (mean mitigation) rankings
     max_disparity_new = max(mean_mitigation_by_group.values()) - min(
         mean_mitigation_by_group.values()
     )
 
-    # Generate HTML content
+    # Prepare the HTML content by inserting the calculated values and images into the template
     html_content = protected_fragment.format(
-        er_viz_str=boxplot_img_str,
-        network_img_str=network_img_str,
-        ranking_variable=ranking_variable,
-        normal_distribution_img_str=normal_distribution_img_str,
-        distribution_img_str=distribution_img_str,
-        group_metrics_rows=generate_group_metrics_rows(ER_Old, ER_Mitigation, n_runs),
-        max_disparity_old=max_disparity_old,
-        max_disparity_new=max_disparity_new,
-        std_dev_old=statistics.stdev(list(ER_Old.values())),
-        std_dev_new=statistics.stdev(list(mean_mitigation_by_group.values())),
-        n_runs=n_runs,
+        er_viz_str=boxplot_img_str, # Boxplot image string
+        network_img_str=network_img_str,  # Network visualization image string
+        ranking_variable=ranking_variable, # Ranking variable used
+        normal_distribution_img_str=normal_distribution_img_str, # Normal distribution image string
+        distribution_img_str=distribution_img_str, # Overall distribution image string
+        group_metrics_rows=generate_group_metrics_rows(ER_Old, ER_Mitigation, n_runs), # Generate metrics row for groups
+        max_disparity_old=max_disparity_old, # Max disparity in old rankings
+        max_disparity_new=max_disparity_new,  # Max disparity in new rankings
+        std_dev_old=statistics.stdev(list(ER_Old.values())), # Standard deviation of old rankings
+        std_dev_new=statistics.stdev(list(mean_mitigation_by_group.values())),  # Standard deviation of new rankings
+        n_runs=n_runs, # Number of simulation runs
     )
 
-    return html_content
+    return html_content # Return the generated HTML content
 
 
 def generate_html_report(
@@ -635,7 +743,23 @@ def generate_html_report(
     male_fragment,
     n_runs,
 ):
+    """
+    Generates an HTML report based on the provided dataset and specified attributes.
 
+    Args:
+        dataset (pd.DataFrame): The dataset containing the data to be analyzed.
+        sensitive_attribute (str): The sensitive attribute to be reported on (e.g. gender, race).
+        sampling_attribute (str): The attribute used for sampling in the analysis.
+        ranking_variable (str): The variable used for ranking groups in the report.
+        female_fragment (str): HTML fragment to represent female group in the report.
+        male_fragment (str): HTML fragment to represent male group in the report.
+        n_runs (int): The number of runs for which the report is being generated.
+
+    Returns:
+        HTML: An HTML object containing the generated report.
+    """
+
+     # Generate the HTML content by formatting the template with provided arguments
     html_content = template.format(
         sensitive_attribute=sensitive_attribute,
         sampling_attribute=sampling_attribute,
@@ -645,7 +769,7 @@ def generate_html_report(
         male_fragment=male_fragment,
         n_runs=n_runs,
     )
-    return HTML(html_content)
+    return HTML(html_content)  # Return the generated HTML content as an HTML object
 
 
 def plot_network(
@@ -657,8 +781,29 @@ def plot_network(
     division_size_edges=100,
     size_edges=1,
 ):
+    """
+    Plots a network graph using NetworkX and visualizes it with Matplotlib.
+
+    Parameters:
+    G (networkx.Graph): The graph to be plotted. Can be a directed or undirected graph.
+    title (str): The title of the plot to be displayed.
+    name_plot (str): The name to be used for saving the plot (this does not affect the current implementation).
+    directed (bool): Indicates if the graph is directed. Default is False (undirected).
+    amplyfing_size_nodes (int): Factor to amplify the node sizes based on their degree. Default is 2.
+    division_size_edges (int): Value used to normalize edge weights for visualization. Default is 100.
+    size_edges (int): Base size of edges. Default is 1.
+    
+    Returns:
+    str: A base64 encoded string representation of the plot image.
+    """
+    
+    # Get the degree of each node in the graph as a dictionary
     degree = dict(G.degree(weight="weight"))
+
+    # Retrieve weights for each edge based on their attributes
     weights = [G[u][v]["weight"] for u, v in G.edges()]
+
+    # Compute node positions using the ForceAtlas2 layout algorithm
     pos = networks_layouts.forceatlas2_layout(
         G,
         max_iter=300,
@@ -675,22 +820,28 @@ def plot_network(
         seed=10,
         dim=2,
     )
-    ncols = 1
-    nrows = 1
 
+    # Create a figure for the plot
+    ncols = 1 # Number of columns
+    nrows = 1 # Number of rows
+
+    # Generate the subplots
     fig, axes = plt.subplots(ncols=ncols, nrows=nrows, figsize=(10, 10))
 
+    # Draw the network graph
     nx.draw_networkx(
         G,
-        with_labels=False,
-        pos=pos,
-        node_color=(255 / 256, 102 / 256, 102 / 256, 0.7),
-        node_size=[i * amplyfing_size_nodes + 1 for i in list(degree.values())],
-        edge_color="lightgray",
-        width=np.array(weights) / division_size_edges + size_edges,
-        arrowsize=3,
-        ax=axes,
+        with_labels=False, # No labels on the nodes
+        pos=pos, # Node positions
+        node_color=(255 / 256, 102 / 256, 102 / 256, 0.7), # Node color with transparency
+        node_size=[i * amplyfing_size_nodes + 1 for i in list(degree.values())], # Adjust node sizes
+        edge_color="lightgray", # Edge color
+        width=np.array(weights) / division_size_edges + size_edges, # Determine edge width based on weights
+        arrowsize=3, # Size of arrows if the graph is directed
+        ax=axes, # Axes to plot on
     )
+
+    # Determine connected components based on directed/undirected
     if directed == False:
         Connected_componets = sorted(nx.connected_components(G), key=len, reverse=True)
     else:
@@ -698,13 +849,19 @@ def plot_network(
             nx.weakly_connected_components(G), key=len, reverse=True
         )
 
+    # Set the title of the plot
     plt.title(title, fontweight="bold", fontsize=20)
+
+    # Remove the spines (borders) from the plot
     for axis in ["top", "bottom", "left", "right"]:
         axes.spines[axis].set_linewidth(0)
 
-    # Save and encode
+    # Save the figure and close it to free up memory
     plt.close(fig)
+
+     # Encode the plot in base64 to facilitate embedding in other formats (like HTML)
     enc_str = get_base64_encoded_image(fig)
+    
     return enc_str
 
 
@@ -720,24 +877,34 @@ def exposure_distance_comparison(
     ) = "Degree",
 ) -> HTML:
     """
-    Compute the exposure distance between the protected and non-protected groups in the dataset and ranking.
-    Sensitive attributes is a comma-separated list of the attributes relevant for fairness analysis. WCurrently, only *Gender* is supported.
+   Compute the exposure distance between the protected and non-protected groups in the dataset and ranking.
+
+    Sensitive attributes is a comma-separated list of the attributes relevant for fairness analysis. Currently,
+    only *Gender* is supported.
+    
     Args:
-        n_runs: Choose a natural number between 1 and 100.
-        sampling_attribute: The value by which we group the analysis for finer-grained results. One of *Nationality&#95;IncomeGroup* or *Nationality&#95;Region*.
-        ranking_variable: This refers to the main criteria by which ranking is done.  One of *Degree*, *Citations* or *Productivity*.
+        dataset (Graph_CSH): The dataset containing researcher information and their connections.
+        model (ResearcherRanking): A model used for ranking researchers based on specified criteria.
+        sensitive (List[str]): A list of sensitive attributes relevant for fairness analysis (default is ["Gender"]).
+        n_runs (int): Number of runs for ranking; choose a natural number between 1 and 100 (default is 1).
+        sampling_attribute (str): The attribute used for grouping analysis; options are *Nationality_IncomeGroup* or *Nationality_Region* (default is "Nationality_IncomeGroup").
+        ranking_variable (mammoth.integration.Options): The main criteria for ranking researchers; options include *Degree*, *Citations*, or *Productivity* (default is "Degree").
+    
+    Returns:
+        HTML: An HTML report detailing the exposure distances and visualizations for protected and non-protected groups.
     """
 
     fragments = {"male": "", "female": ""}
     for protected in ["female", "male"]:
         n_runs = int(n_runs)
 
-        # initialize our own baseline model
+       # Initialize the baseline model for ranking
         model_baseline = model.baseline_rank
 
+        # Extract the researchers' graph from the dataset
         researchers_graph = dataset.G
 
-        # Plot the network if it is small enough
+        # Plot the network if the number of nodes is less than 2500
         if len(researchers_graph.nodes) < 2500:
             network_image = plot_network(
                 G=researchers_graph,
@@ -745,41 +912,49 @@ def exposure_distance_comparison(
                 name_plot="Co-authorship_network.pdf",
             )
         else:
+            # Convert large network image to a base64 string instead
             network_image = image_to_base64("./data/researchers/network.png")
 
+        # Prepare nodes for DataFrame creation
         Dataframe_nodes = {"id": []}
         for i in researchers_graph.nodes():
             Dataframe_nodes["id"] += [i]
+            # Populate other attributes of nodes
             for k, v in researchers_graph.nodes[i].items():
                 try:
                     Dataframe_nodes[k] += [v]
                 except:
+                    # Initialize the key in the dictionary if it doesn't exist.
                     Dataframe_nodes[k] = [v]
 
+        # Convert the node data into a pandas DataFrame.
         data = pd.DataFrame(Dataframe_nodes)
 
-        # Only consider those rows where the sampling attribute is not missing
+        # Only include rows where the sampling attribute is not missing.
         dataframe_sampling = data[~data[sampling_attribute].isnull()]
 
+        # Store the original ranking variable and the sensitive and protected attributes.
         Old_ranking_variable = ranking_variable
         sensitive_attribute = sensitive[0]
         protected_attribute = protected
 
-        ER_Old = {}
-        ER_Mitigation = {}
+        ER_Old = {} # To store exposure distances under old ranking.
+        ER_Mitigation = {} # To store exposure distances under mitigation strategies.
 
-        ranked_dataframe_normal = pd.DataFrame()
-        ranked_dataframe_mitigation = pd.DataFrame()
+        ranked_dataframe_normal = pd.DataFrame() # DataFrame for normal ranking results.
+        ranked_dataframe_mitigation = pd.DataFrame() # DataFrame for mitigation ranking results.
 
+        # Iterate over each category defined by the sampling attribute.
         for category in sorted(set(dataframe_sampling[sampling_attribute])):
 
+            # Filter the main DataFrame for the current category.
             dataframe_filtered = dataframe_sampling[
                 dataframe_sampling[sampling_attribute] == category
             ]
 
             print(f"{len(dataframe_filtered)} researchers in the category {category}")
 
-            # Rank the rows using the model
+            # Rank the filtered DataFrame using the baseline model.
             if callable(model_baseline):
                 ranked_dataframe_normal_category = model_baseline(
                     dataframe_filtered, ranking_variable
@@ -789,18 +964,20 @@ def exposure_distance_comparison(
                     dataframe_filtered, ranking_variable
                 )
 
-            # Compute the exposure distance for the normal ranking
+            # Compute the exposure distance for the baseline ranking.
             ER_Old[category] = Exposure_distance(
                 ranked_dataframe_normal_category,
                 ranking_variable=Old_ranking_variable,
                 sensitive_attribute=sensitive_attribute,
                 protected_attirbute=protected_attribute,
             )
+
+            
             ranked_dataframe_normal = pd.concat(
                 [ranked_dataframe_normal, ranked_dataframe_normal_category]
             )
 
-            # Compute the exposure distance for the normal ranking
+            # Compute exposure distance for mitigation strategies
             ER_Mitigation[category] = {}
             ranked_dataframe_mitigation_category_runs = []
 
@@ -814,7 +991,8 @@ def exposure_distance_comparison(
                     ranked_dataframe_mitigation_category = model.rank(
                         dataframe_filtered, ranking_variable
                     )
-
+                    
+                # Calculate exposure distance for mitigation
                 ER_Mitigation[category][r] = Exposure_distance(
                     ranked_dataframe_mitigation_category,
                     ranking_variable=Old_ranking_variable,
@@ -825,26 +1003,27 @@ def exposure_distance_comparison(
                     ranked_dataframe_mitigation_category
                 )
 
-            # Concatenate all runs
+            # Concatenate all runs to create a single DataFrame
             all_runs_df = pd.concat(ranked_dataframe_mitigation_category_runs)
 
-            # Separate numeric columns for mean calculation
+            # Separate numeric columns for computing mean rankings
             numeric_cols = all_runs_df.select_dtypes(include=[np.number]).columns
             mean_ranking_df = all_runs_df[numeric_cols].groupby(level=0).mean()
 
-            # If you need non-numeric columns, take the first occurrence (e.g., string columns remain unchanged)
+            # For non-numeric columns, take the first occurrence
             non_numeric_df = (
                 all_runs_df.select_dtypes(exclude=[np.number]).groupby(level=0).first()
             )
 
-            # Merge numeric and non-numeric back together
+            # Merge numeric and non-numeric DataFrames
             mean_ranking_df = pd.concat([mean_ranking_df, non_numeric_df], axis=1)
 
-            # Append to the main mitigation DataFrame
+            ## Append the mean ranking DataFrame to the main mitigation DataFrame
             ranked_dataframe_mitigation = pd.concat(
                 [ranked_dataframe_mitigation, mean_ranking_df]
             )
 
+        # Generate boxplots for normal ranking distribution
         normal_distribution_image = boxplots_rankings(
             ranked_dataframe_normal,
             hue_variable=sensitive_attribute,
@@ -852,6 +1031,7 @@ def exposure_distance_comparison(
             ranking_variable="Ranking_" + Old_ranking_variable,
         )
 
+        # Generate boxplots for the mitigated ranking distribution
         distribution_image = boxplots_rankings(
             ranked_dataframe_mitigation,
             hue_variable=sensitive_attribute,
@@ -859,6 +1039,7 @@ def exposure_distance_comparison(
             ranking_variable="Ranking_" + Old_ranking_variable,
         )
 
+        # Generate images for different mitigation strategies
         mitigation_strategies_image = boxplots_mitigation_strategies_pretty(
             ER_Old,
             ER_Mitigation,
@@ -867,6 +1048,7 @@ def exposure_distance_comparison(
             n_runs=n_runs,
         )
 
+        # Create HTML fragments for each protected group
         fragments[protected] = generate_html_fragment(
             ranking_variable=ranking_variable,
             ER_Old=ER_Old,
@@ -878,7 +1060,7 @@ def exposure_distance_comparison(
             n_runs=n_runs,
         )
 
-    # Now create the full report
+    # Generate the full HTML report from the collected fragments
     return generate_html_report(
         dataset=data,
         sensitive_attribute=sensitive,
